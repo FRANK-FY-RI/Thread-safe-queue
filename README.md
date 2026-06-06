@@ -27,6 +27,7 @@ Available in two forms:
 ```text
 .
 ├── threadsafe_queue.hpp
+├── README.md
 ├── .gitignore
 └── tests
     ├── push_test.cpp
