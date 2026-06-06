@@ -9,7 +9,7 @@ lock based thread safe queue based on std::queue
 */
 
 template <typename T>
-class threadsafe_queue {
+class threadsafe_queue { 
     std::queue<T> q;
     mutable std::mutex mt;
     std::condition_variable cv;
@@ -18,14 +18,11 @@ public:
     threadsafe_queue()=default;
     threadsafe_queue(const threadsafe_queue& other) {
         guard_type guard(other.mt);
-        q(other.q);
+        q = other.q;
     }
-    threadsafe_queue& operator=(const threadsafe_queue&)=delete;
-    threadsafe_queue(const threadsafe_queue&& other) {
-        guard_type guard(other.mt);
-        q(std::move(other.q));
-    }
-    threadsafe_queue& operator=(const threadsafe_queue&&)=delete;
+    threadsafe_queue& operator=(const threadsafe_queue&)=delete; 
+    threadsafe_queue(threadsafe_queue&&)=delete;
+    threadsafe_queue& operator=(threadsafe_queue&&)=delete;
     ~threadsafe_queue()=default;
 
     template <typename U>
@@ -64,7 +61,7 @@ public:
         std::unique_lock<std::mutex> uq(mt);
         cv.wait(uq, [this](){return !q.empty();});
         std::shared_ptr<T> const res(
-            std::make_shared<T>(std::move(q.front()));
+            std::make_shared<T>(std::move(q.front()))
         );
         q.pop();
         return res;
