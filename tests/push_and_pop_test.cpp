@@ -1,5 +1,5 @@
-#include "threadsafe_queue.hpp"
-#include "../../c++/Runtime_monitor.hpp"
+#include "../threadsafe_queue.hpp"
+#include "Runtime_monitor.hpp"
 #include <vector>
 #include <iostream>
 #include <thread>

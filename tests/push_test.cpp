@@ -1,14 +1,14 @@
-#include "threadsafe_queue.hpp"
+#include "../threadsafe_queue.hpp"
 #include <vector>
 #include <thread>
 #include <iostream>
 #include <queue>
 #include <algorithm>
-#include "../../c++/Runtime_monitor.hpp"
+#include "Runtime_monitor.hpp"
 
 int main() {
     const int iterations = 10; 
-    const int limit = 10'000'000;
+    const int limit = 1'000'000;
     
     //sequential
     std::queue<int> q;
@@ -27,7 +27,7 @@ int main() {
     threadsafe_queue<int> tsq;
     double par_time = 0;
     {
-        int n_threads = 96;
+        int n_threads = 24;
         int block_size = limit/n_threads;
         double thread_overhead = 0;
         auto block_push = [&tsq] (int start, int end) {
