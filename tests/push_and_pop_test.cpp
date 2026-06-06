@@ -3,26 +3,28 @@
 #include <vector>
 #include <iostream>
 #include <thread>
+#include <atomic>
 #include <unistd.h>
 
 int main() {
-    int n_pushth = 40, n_popth = 40, limit = 100;
+    int n_pushth = 40, n_popth = 40, limit = 1000000;
     threadsafe_queue<int> q;
-    auto pushele = [&q, &limit](int ind) {
+    std::vector<std::atomic<int>> freq(limit+1);
+    auto pushele = [&q, &limit, &freq](int ind) {
         thread_local int ele = 1; 
         while(ele<=limit) {
-            std::cout<<"Thread "<<ind<<" push: "<<ele<<'\n';
             q.push(ele);
+            freq[ele]++;
             ele++;
             // sleep(1);
         }
     };
-    auto popele = [&q, &limit](int ind) {
+    auto popele = [&q, &limit, &freq](int ind) {
         int i = 0; 
         while(i<limit) {
             int ele;
-            std::cout<<"Thread "<<ind<<" pop: "<<ele<<'\n';
             q.wait_and_pop(ele);
+            freq[ele]--;
             i++;
             // sleep(1);
         }
@@ -37,11 +39,16 @@ int main() {
 
     for(auto &it:threads) it.join();
 
-    std::cout<<"remaining elements\n";
-    int val;
-    while(q.try_pop(val)) {
-        std::cout<<val<<'\n';
-    }
+    bool ch = true;
+    for(auto &it:freq) {
+        if(it != 0) {
+            ch = false;
+            break;
+        }
+    } 
+
+    if(ch) std::cout<<"queue worked correctly\n";
+    else std::cout<<"queue did not worl correctly\n";
 
     return 0;
 }
