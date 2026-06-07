@@ -1,32 +1,29 @@
 #include "../threadsafe_queue.hpp"
-#include "Runtime_monitor.hpp"
 #include <vector>
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <unistd.h>
 
 int main() {
-    int n_pushth = 40, n_popth = 40, limit = 1000000;
+    int n_pushth = 40, n_popth = 40, limit = 10000000;
     threadsafe_queue<int> q;
+    std::atomic<int> ele = 0, consumed = 0;
     std::vector<std::atomic<int>> freq(limit+1);
-    auto pushele = [&q, &limit, &freq](int ind) {
-        thread_local int ele = 1; 
-        while(ele<=limit) {
-            q.push(ele);
-            freq[ele]++;
-            ele++;
-            // sleep(1);
+    auto pushele = [&](int ind) {
+        while(true) {
+            int id = ++ele;
+            if(id>limit) break;
+            q.push(id);
+            freq[id]++;
         }
     };
-    auto popele = [&q, &limit, &freq](int ind) {
-        int i = 0; 
-        while(i<limit) {
-            int ele;
-            q.wait_and_pop(ele);
-            freq[ele]--;
-            i++;
-            // sleep(1);
+    auto popele = [&](int ind) {
+        while(true) {
+            int idx = ++consumed;
+            if(idx>limit) break;
+            int val;
+            q.wait_and_pop(val);
+            freq[val]--;
         }
     };
 
@@ -48,7 +45,7 @@ int main() {
     } 
 
     if(ch) std::cout<<"queue worked correctly\n";
-    else std::cout<<"queue did not worl correctly\n";
+    else std::cout<<"queue did not work correctly\n";
 
     return 0;
 }
